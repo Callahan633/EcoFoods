@@ -49,6 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=False
     )
 
+    token = models.CharField(max_length=255)
+    
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'

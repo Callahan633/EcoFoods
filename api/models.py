@@ -13,16 +13,12 @@ from .utils import UUIDEncoder
 
 class UserManager(BaseUserManager):
 
-    def _create_user(self, first_name, last_name, email, password, **extra_fields):
-        if not (first_name or last_name or password):
-            raise ValueError('User must have first name and last name and password')
-        if not email:
-            raise ValueError('User must provide an email')
+    def _create_user(self, email, password, **extra_fields):
+        if not email or password:
+            raise ValueError('User must provide an email and password')
 
         email = self.normalize_email(email)
         user = self.model(
-            first_name=first_name,
-            last_name=last_name,
             email=email,
             **extra_fields,
         )
@@ -31,14 +27,14 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_user(self, first_name, last_name, email, password, **extra_fields):
-        return self._create_user(first_name, last_name, email, password, **extra_fields)
+    def create_user(self, email, password, **extra_fields):
+        return self._create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name = models.CharField(max_length=255, blank=False)
-    last_name = models.CharField(max_length=255, blank=False)
+    first_name = models.CharField(max_length=255, blank=True)
+    last_name = models.CharField(max_length=255, blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)

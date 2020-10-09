@@ -39,12 +39,13 @@ class JWTAuth(authentication.BaseAuthentication):
     def _authenticate_credentials(self, request, token):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY)
+
         except:
             msg = 'Invalid authentication. Could not decode token.'
             raise exceptions.AuthenticationFailed(msg)
 
         try:
-            user = User.objects.get(uuid=payload['uuid'])
+            user = User.objects.get(uuid=payload['id'])
         except User.DoesNotExist:
             msg = "No user matching this token was found"
             raise exceptions.AuthenticationFailed(msg)

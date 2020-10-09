@@ -1,10 +1,10 @@
 import uuid
 from datetime import datetime, timedelta
 
-from django.conf import settings
 from django.db import models
 from django.core import validators
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.conf import settings
 
 import jwt
 
@@ -32,16 +32,15 @@ class UserManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, password, **extra_fields):
         return self._create_user(first_name, last_name, email, password, **extra_fields)
 
-    # def create_seller(self, first_name, last_name, email, password, **extra_fields):
-    #     return self._create_user(first_name, last_name, email, password, **extra_fields)
-
 
 class User(AbstractBaseUser, PermissionsMixin):
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     first_name = models.CharField(max_length=255, blank=False)
     last_name = models.CharField(max_length=255, blank=False)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
     email = models.EmailField(
         db_index=True,

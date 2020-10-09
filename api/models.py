@@ -14,7 +14,7 @@ from .utils import UUIDEncoder
 class UserManager(BaseUserManager):
 
     def _create_user(self, email, password, **extra_fields):
-        if not email or password:
+        if not email or not password:
             raise ValueError('User must provide an email and password')
 
         email = self.normalize_email(email)

@@ -9,18 +9,10 @@ from .serializers import RegistrationSerializer
 
 
 class RegistrationAPIView(APIView):
-    """
-    Registers a new user.
-    """
     permission_classes = [AllowAny]
     serializer_class = RegistrationSerializer
 
     def post(self, request):
-        """
-        Creates a new User object.
-        Username, email, and password are required.
-        Returns a JSON web token.
-        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

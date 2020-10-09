@@ -49,8 +49,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=False
     )
 
-    token = models.CharField(max_length=255)
-    
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
@@ -63,7 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.first_name} {self.last_name}"
 
     @property
-    def get_token(self):
+    def token(self):
         return self._generate_jwt_token()
 
     def get_full_name(self):

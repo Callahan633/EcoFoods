@@ -8,6 +8,8 @@ from django.conf import settings
 
 import jwt
 
+from .utils import UUIDEncoder
+
 
 class UserManager(BaseUserManager):
 
@@ -34,8 +36,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=255, blank=False)
     last_name = models.CharField(max_length=255, blank=False)
 
@@ -77,8 +78,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         dt = datetime.now() + timedelta(days=30)
 
         token = jwt.encode({
-            'id': self.id,
+            'id': self.uuid,
             'exp': int(dt.strftime('%s'))
-        }, settings.SECRET_KEY, algorithm='HS256')
+        },
+            settings.SECRET_KEY, algorithm='HS256',
+            json_encoder=UUIDEncoder
+        )
 
         return token.decode('utf-8')

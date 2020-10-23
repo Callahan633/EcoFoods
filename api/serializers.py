@@ -2,9 +2,13 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
-from .models import User
+from .models import User, Category
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255, read_only=True)
+
+    
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         max_length=128,

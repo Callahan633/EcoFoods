@@ -11,9 +11,22 @@ import jwt
 from .utils import UUIDEncoder
 
 
+class ImageManager(models.Manager):
+
+    def create_image(self, url):
+        image = self.model(
+            url=url,
+        )
+        image.save(using=self._db)
+
+        return image
+
+
 class Image(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     url = models.URLField()
+
+    objects = ImageManager()
 
 
 class UserManager(BaseUserManager):
@@ -92,15 +105,49 @@ class User(AbstractBaseUser, PermissionsMixin):
         return token.decode('utf-8')
 
 
+class ProductManager(models.Manager):
+
+    def _create_product(self, user: User, **extra_fields):
+        if not user:
+            raise ValueError('User must be provided')
+
+        product = self.model(
+            merchant=user,
+            **extra_fields,
+        )
+
+        product.save(using=self._db)
+
+        return product
+
+    def create_product_from_merchant(self, user: User, **extra_fields):
+        return self._create_product(user, **extra_fields)
+
+
+class ProductImageManager(models.Manager):
+
+    def _create_image_product_link(self, image, product):
+        product_image = self.model(
+            product=product,
+            image=image,
+        )
+        product_image.save(using=self._db)
+
+        return product_image
+
+    def create_link(self, image, product):
+        return self._create_image_product_link(image, product)
+
+
 class Chat(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    merchant = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer')
+    merchant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendor')
 
 
 class Message(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    text = models.TextField
+    text = models.TextField()
     send_date = models.DateTimeField(auto_now_add=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -115,8 +162,12 @@ class Category(models.Model):
 class Product(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, blank=False)
+    is_featured = models.BooleanField(default=False)
     merchant = models.ForeignKey(User, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=9, decimal_places=2)
+    description = models.TextField()
+
+    objects = ProductManager()
 
 
 class Review(models.Model):
@@ -125,7 +176,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     merchant = models.ForeignKey(User, on_delete=models.CASCADE)
-    review_text = models.TextField
+    review_text = models.TextField()
 
 
 class Order(models.Model):
@@ -145,6 +196,8 @@ class ProductImage(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
+
+    objects = ProductImageManager()
 
 
 class OrderItem(models.Model):

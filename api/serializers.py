@@ -2,13 +2,24 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
-from .models import User, Category
+from .models import User, Product, Image, ProductImage
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=255, read_only=True)
+class ProductSerializer(serializers.ModelSerializer):
 
-    
+    class Meta:
+        model = Product
+        fields = ('uuid', 'name', 'is_featured', 'price', 'description')
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        image_url = self.data.get('img')
+        image = Image.objects.create_image(image_url)
+        product = Product.objects.create_product_from_merchant(user, **validated_data)
+        ProductImage.objects.create_link(image, product)
+        return product
+
+
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         max_length=128,

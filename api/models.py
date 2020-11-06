@@ -48,10 +48,18 @@ class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         return self._create_user(email, password, **extra_fields)
 
+    def set_status(self, is_merchant):
+        user = self.model(
+            is_merchant=is_merchant,
+        )
+
+        user.save(using=self._db)
+        return user
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    avatar = models.ForeignKey(Image, on_delete=models.CASCADE)
+    # avatar = models.ForeignKey(Image, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255, blank=True)
@@ -163,9 +171,10 @@ class Product(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, blank=False)
     is_featured = models.BooleanField(default=False)
-    merchant = models.ForeignKey(User, on_delete=models.CASCADE)
+    merchant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='merchant')
     price = models.DecimalField(max_digits=9, decimal_places=2)
     description = models.TextField()
+    units = models.CharField(max_length=255, blank=False)  # @TODO: Make as ENUM, not CharField()
 
     objects = ProductManager()
 
@@ -205,7 +214,6 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
-    units = models.CharField(max_length=255, blank=False)  # @TODO: Make as ENUM, not CharField()
 
 
 class ProductCategory(models.Model):

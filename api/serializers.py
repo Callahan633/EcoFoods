@@ -9,15 +9,40 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('uuid', 'name', 'is_featured', 'price', 'description')
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units')
 
     def create(self, validated_data):
         user = self.context['request'].user
-        image_url = self.data.get('img')
+        image_url = self.context['request'].data['img']
         image = Image.objects.create_image(image_url)
         product = Product.objects.create_product_from_merchant(user, **validated_data)
         ProductImage.objects.create_link(image, product)
         return product
+
+
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('address', )
+
+
+class HomeViewSerializer(serializers.ModelSerializer):
+    merchant = AddressSerializer()
+
+    class Meta:
+        model = Product
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant')
+
+
+class UserStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('is_merchant',)
+
+    def update(self, instance, validated_data):
+        return User.objects.set_status(instance, **validated_data)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

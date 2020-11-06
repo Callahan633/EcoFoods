@@ -35,14 +35,11 @@ class HomeViewSerializer(serializers.ModelSerializer):
         fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant')
 
 
-class UserStatusSerializer(serializers.ModelSerializer):
+class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('is_merchant',)
-
-    def update(self, instance, validated_data):
-        return User.objects.set_status(instance, **validated_data)
+        fields = ('uuid', 'is_merchant', 'first_name', 'last_name', 'address', 'phone_number')
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

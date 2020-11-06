@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
-from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer, UserStatusSerializer, HomeViewSerializer
+from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer,\
+    UpdateUserSerializer, HomeViewSerializer
 from .models import Product
 
 
@@ -25,19 +26,16 @@ class RegistrationAPIView(APIView):
         )
 
 
-class SetUserAsMerchantAPIView(APIView):
+class UpdateUserAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UserStatusSerializer
+    serializer_class = UpdateUserSerializer
 
     def patch(self, request):
-        serializer = self.serializer_class(context={'request': request}, data=request.data, partial=True)
-        user = request.user
-        user_status = serializer.data.get('is_merchant')
-        serializer.update(user, user_status)
+        serializer = self.serializer_class(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(
-            {
-                'is_merchant': serializer.data.get('is_merchant')
-            },
+            serializer.data,
             status=status.HTTP_200_OK
         )
 

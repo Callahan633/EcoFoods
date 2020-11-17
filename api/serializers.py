@@ -20,6 +20,34 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
 
+class ImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ('uuid', 'url')
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    image = ImageSerializer()
+
+    class Meta:
+        model = ProductImage
+        fields = ('image',)
+
+
+class ProductSerializerForMerchant(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_images(obj):
+        image = ProductImage.objects.filter(product=obj)
+        return ProductImageSerializer(image, many=True).data
+
+    class Meta:
+        model = Product
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'description', 'images')
+
+
 class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:

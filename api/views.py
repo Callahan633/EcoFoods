@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer,\
-    UpdateUserSerializer, HomeViewSerializer
+    UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant
 from .models import Product
 
 
@@ -36,6 +36,19 @@ class UpdateUserAPIView(APIView):
         serializer.save()
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class MerchantProductsAPIView(ViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductSerializerForMerchant
+
+    def retrieve(self, request):
+        products = Product.objects.all().filter(merchant=self.request.user)
+        product_serializer = self.serializer_class(products, many=True)
+        return Response(
+            product_serializer.data,
             status=status.HTTP_200_OK
         )
 

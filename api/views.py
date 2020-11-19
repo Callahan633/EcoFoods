@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer,\
-    UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant
-from .models import Product
+    UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant, OrderOverallSerializer, OrderSerializer
+from .models import Product, Order
 
 
 class RegistrationAPIView(APIView):
@@ -36,6 +36,39 @@ class UpdateUserAPIView(APIView):
         serializer.save()
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class CreateOrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def post(self, request):
+        order_serializer = self.serializer_class(context={'request': request}, data=request.data)
+        order_serializer.is_valid(raise_exception=True)
+        order_serializer.save()
+
+        return Response(
+            {
+                'order_id': order_serializer.data.get('uuid'),
+                'order_date': order_serializer.data.get('created_at')
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+class OrdersListAPIView(ViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderOverallSerializer
+    order_queryset = Order.objects.all()
+
+    def retrieve(self, request):
+        user_orders = self.order_queryset.filter(user=self.request.user)
+        order_serializer = self.serializer_class(context={'request': request}, data=request.data)
+        order_serializer.is_valid(raise_exception=True)
+        return Response(
+            order_serializer.data,
             status=status.HTTP_200_OK
         )
 

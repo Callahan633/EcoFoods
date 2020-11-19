@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 
 from api.views import RegistrationAPIView, LoginAPIView, ProductAPIView, UpdateUserAPIView, HomePageAPIView, \
-    MerchantProductsAPIView
+    MerchantProductsAPIView, CreateOrderAPIView, OrdersListAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,4 +14,7 @@ urlpatterns = [
     re_path(r'^api/home/?$', HomePageAPIView.as_view({'get': 'retrieve'}), name='homepage'),
     re_path(r'^api/merchant/get_products', MerchantProductsAPIView.as_view({'get': 'retrieve'}),
             name='merchant_products'),
+    re_path(r'^api/merchant/create_order', CreateOrderAPIView.as_view(), name='create_order'),
+    re_path(r'^api/customer/get_orders', OrdersListAPIView.as_view(), name='customer_get_order_list'),
+    
 ]

@@ -147,6 +147,31 @@ class ProductImageManager(models.Manager):
         return self._create_image_product_link(image, product)
 
 
+class OrderManager(models.Manager):
+
+    def create_order(self, user, status):
+        order = self.model(
+            user=user,
+            status=status,
+        )
+        order.save(using=self._db)
+
+        return order
+
+
+class OrderItemManager(models.Manager):
+
+    def create_order_product_link(self, order, product, quantity):
+        order_item = self.model(
+            order=order,
+            product=product,
+            quantity=quantity
+        )
+        order_item.save(using=self._db)
+
+        return order_item
+
+
 class Chat(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer')
@@ -194,6 +219,8 @@ class Order(models.Model):
     status = models.CharField(max_length=255, blank=False)  # @TODO: Make as ENUM, not CharField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = OrderManager()
+
 
 class ReviewImage(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -211,9 +238,11 @@ class ProductImage(models.Model):
 
 class OrderItem(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product')
     quantity = models.IntegerField(default=0)
+
+    objects = OrderItemManager()
 
 
 class ProductCategory(models.Model):

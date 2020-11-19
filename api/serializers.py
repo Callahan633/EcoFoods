@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
-from .models import User, Product, Image, ProductImage
+from .models import User, Product, Image, ProductImage, Order, OrderItem
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -20,6 +20,45 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = ('quantity', 'product')
+
+
+class OrderOverallSerializer(serializers.ModelSerializer):
+    products = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_products(obj):
+        product = OrderItem.objects.filter(product=obj)
+        return OrderItemSerializer(product, many=True).data
+
+    class Meta:
+        model = Order
+        fields = ('uuid', 'status', 'created_at', 'products')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ('uuid', 'status', 'created_at')
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        status = "opened"
+        # status = self.context['request'].data['status']
+        product_uuid = self.context['request'].data['product_uuid']
+        quantity = self.context['request'].data['quantity']
+        product = Product.objects.get(uuid=product_uuid)
+        order = Order.objects.create_order(user, status)
+        OrderItem.objects.create_order_product_link(order, product, quantity)
+        return order
+
+
 class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -32,7 +71,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductImage
-        fields = ('image',)
+        fields = ('image', '')
 
 
 class ProductSerializerForMerchant(serializers.ModelSerializer):

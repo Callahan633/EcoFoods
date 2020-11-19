@@ -14,7 +14,7 @@ urlpatterns = [
     re_path(r'^api/home/?$', HomePageAPIView.as_view({'get': 'retrieve'}), name='homepage'),
     re_path(r'^api/merchant/get_products', MerchantProductsAPIView.as_view({'get': 'retrieve'}),
             name='merchant_products'),
-    re_path(r'^api/merchant/create_order', CreateOrderAPIView.as_view(), name='create_order'),
-    re_path(r'^api/customer/get_orders', OrdersListAPIView.as_view(), name='customer_get_order_list'),
-    
+    re_path(r'^api/create_order', CreateOrderAPIView.as_view(), name='create_order'),
+    re_path(r'^api/get_orders', OrdersListAPIView.as_view(), name='customer_get_order_list'),
+
 ]

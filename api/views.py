@@ -65,8 +65,8 @@ class OrdersListAPIView(ViewSet):
 
     def retrieve(self, request):
         user_orders = self.order_queryset.filter(user=self.request.user)
-        order_serializer = self.serializer_class(context={'request': request}, data=request.data)
-        order_serializer.is_valid(raise_exception=True)
+        order_serializer = self.serializer_class(context={'request': request}, data=user_orders, many=True)
+        # order_serializer.is_valid(raise_exception=True)
         return Response(
             order_serializer.data,
             status=status.HTTP_200_OK

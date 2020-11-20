@@ -5,11 +5,26 @@ from rest_framework import serializers
 from .models import User, Product, Image, ProductImage, Order, OrderItem
 
 
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('address', 'first_name', 'last_name')
+
+
+class ProductFromOrderSerializer(serializers.ModelSerializer):
+    merchant = AddressSerializer()
+
+    class Meta:
+        model = Product
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'description', 'merchant')
+
+
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('uuid', 'name', 'is_featured', 'price', 'units')
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'description')
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -21,36 +36,22 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+    product = ProductFromOrderSerializer()
 
     class Meta:
         model = OrderItem
         fields = ('quantity', 'product')
 
 
-class OrderOverallSerializer(serializers.ModelSerializer):
-    products = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_products(obj):
-        product = OrderItem.objects.filter(product=obj)
-        return OrderItemSerializer(product, many=True).data
-
-    class Meta:
-        model = Order
-        fields = ('uuid', 'status', 'created_at', 'products')
-
-
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('uuid', 'status', 'created_at')
+        fields = ('uuid', 'created_at')
 
     def create(self, validated_data):
         user = self.context['request'].user
         status = "opened"
-        # status = self.context['request'].data['status']
         product_uuid = self.context['request'].data['product_uuid']
         quantity = self.context['request'].data['quantity']
         product = Product.objects.get(uuid=product_uuid)
@@ -71,7 +72,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductImage
-        fields = ('image', '')
+        fields = ('image', )
 
 
 class ProductSerializerForMerchant(serializers.ModelSerializer):
@@ -87,13 +88,6 @@ class ProductSerializerForMerchant(serializers.ModelSerializer):
         fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'description', 'images')
 
 
-class AddressSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('address', )
-
-
 class HomeViewSerializer(serializers.ModelSerializer):
     merchant = AddressSerializer()
 
@@ -107,6 +101,19 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('uuid', 'is_merchant', 'first_name', 'last_name', 'address', 'phone_number')
+
+
+class OrderOverallSerializer(serializers.ModelSerializer):
+    products = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_products(obj):
+        product = OrderItem.objects.filter(order=obj)
+        return OrderItemSerializer(product, many=True).data
+
+    class Meta:
+        model = Order
+        fields = ('uuid', 'status', 'created_at', 'products')
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

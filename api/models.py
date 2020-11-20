@@ -230,7 +230,7 @@ class ReviewImage(models.Model):
 
 class ProductImage(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_from_image')
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='image')
 
     objects = ProductImageManager()
@@ -239,7 +239,7 @@ class ProductImage(models.Model):
 class OrderItem(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_from_order')
     quantity = models.IntegerField(default=0)
 
     objects = OrderItemManager()

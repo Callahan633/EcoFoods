@@ -65,8 +65,7 @@ class OrdersListAPIView(ViewSet):
 
     def retrieve(self, request):
         user_orders = self.order_queryset.filter(user=self.request.user)
-        order_serializer = self.serializer_class(context={'request': request}, data=user_orders, many=True)
-        # order_serializer.is_valid(raise_exception=True)
+        order_serializer = self.serializer_class(user_orders, many=True)
         return Response(
             order_serializer.data,
             status=status.HTTP_200_OK
@@ -87,15 +86,15 @@ class MerchantProductsAPIView(ViewSet):
 
 
 class HomePageAPIView(ViewSet):
-    product_queryset = Product.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = HomeViewSerializer
 
     def retrieve(self, request):
+        product_queryset = Product.objects.all()
         res_dict = {}
-        announcements = self.product_queryset
+        announcements = product_queryset
         announcements_serializer = self.serializer_class(announcements, many=True)
-        advertisings = self.product_queryset.filter(is_featured=True)
+        advertisings = product_queryset.filter(is_featured=True)
         advertisings_serializer = self.serializer_class(advertisings, many=True)
         res_dict['announcements'] = announcements_serializer.data
         res_dict['advertisings'] = advertisings_serializer.data

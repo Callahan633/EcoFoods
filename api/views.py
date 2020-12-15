@@ -3,10 +3,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListCreateAPIView
 
 from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer,\
     UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant, OrderOverallSerializer, OrderSerializer,\
-    AddDeliverySerializer, ChangeDeliverySerializer, UpdateOrderStatusSerializer
+    AddDeliverySerializer, ChangeDeliverySerializer, UpdateOrderStatusSerializer, UserInfoSerializer, SearchProductSerializer
 from .models import Product, Order, Delivery, OrderItem
 
 
@@ -35,6 +37,19 @@ class UpdateUserAPIView(APIView):
         serializer = self.serializer_class(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class GetUserInfoAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserInfoSerializer
+
+    def get(self, request):
+        serializer = self.serializer_class(request.user)
+
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -88,7 +103,7 @@ class AddProductToOrderAPIView(APIView):
         updated_order = orders.get(uuid=self.request.data['order_uuid'])
         order = self.serializer_class(updated_order, data=request.data, partial=True)
         order.is_valid(raise_exception=True)
-        
+
         return Response(
             order.validated_data,
             status=status.HTTP_200_OK
@@ -155,6 +170,13 @@ class MerchantProductsAPIView(ViewSet):
             product_serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class SearchProductAPIView(ListCreateAPIView):
+    search_fields = ['name']
+    filter_backends = (SearchFilter,)
+    serializer_class = SearchProductSerializer
+    queryset = Product.objects.all()
 
 
 class HomePageAPIView(ViewSet):

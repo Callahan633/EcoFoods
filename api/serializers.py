@@ -9,7 +9,21 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('address', 'first_name', 'last_name')
+        fields = ('uuid', 'address', 'first_name', 'last_name')
+
+
+class SearchProductSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+    merchant = AddressSerializer()
+
+    @staticmethod
+    def get_images(obj):
+        image = ProductImage.objects.filter(product=obj)
+        return ProductImageSerializer(image, many=True).data
+
+    class Meta:
+        model = Product
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'description', 'merchant', 'images')
 
 
 class ProductFromOrderSerializer(serializers.ModelSerializer):
@@ -49,14 +63,6 @@ class UpdateOrderStatusSerializer(serializers.ModelSerializer):
         model = Order
         fields = ('uuid', 'status')
 
-
-# class AddProductToOrderSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Order
-#         fields = ('uuid', 'created_at')
-#
-#
 
 class OrderSerializer(serializers.ModelSerializer):
 
@@ -118,6 +124,14 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         fields = ('uuid', 'is_merchant', 'first_name', 'last_name', 'address', 'phone_number')
 
 
+class UserInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('uuid', 'is_merchant', 'first_name', 'last_name', 'address',
+                  'phone_number', 'date_created', 'date_modified', 'delivery_is_possible', 'email')
+
+
 class OrderOverallSerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
 
@@ -132,8 +146,6 @@ class OrderOverallSerializer(serializers.ModelSerializer):
 
 
 class AddDeliverySerializer(serializers.ModelSerializer):
-
-    # order = OrderSerializer()
 
     class Meta:
         model = Delivery

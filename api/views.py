@@ -5,8 +5,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from .serializers import LoginSerializer, RegistrationSerializer, ProductSerializer,\
-    UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant, OrderOverallSerializer, OrderSerializer
-from .models import Product, Order
+    UpdateUserSerializer, HomeViewSerializer, ProductSerializerForMerchant, OrderOverallSerializer, OrderSerializer,\
+    AddDeliverySerializer, ChangeDeliverySerializer, UpdateOrderStatusSerializer
+from .models import Product, Order, Delivery, OrderItem
 
 
 class RegistrationAPIView(APIView):
@@ -36,6 +37,77 @@ class UpdateUserAPIView(APIView):
         serializer.save()
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class CreateDeliveryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddDeliverySerializer
+
+    def post(self, request):
+        delivery_serializer = self.serializer_class(context={'request': request}, data=request.data)
+        delivery_serializer.is_valid(raise_exception=True)
+        delivery_serializer.save()
+
+        return Response(
+            delivery_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class UpdateOrderStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateOrderStatusSerializer
+    order_queryset = Order.objects.all()
+
+    def patch(self, request):
+        order_object = self.order_queryset.get(uuid=request.data['uuid'])
+        serializer = self.serializer_class(order_object, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.validated_data,
+            status=status.HTTP_200_OK
+        )
+
+
+class AddProductToOrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+    order_queryset = Order.objects.all()
+
+    def patch(self, request):
+        orders = self.order_queryset.filter(user=self.request.user)
+        order_item = orders.get(uuid=self.request.data['order_uuid'])
+        product_uuid = self.request.data['product_uuid']
+        quantity = self.request.data['quantity']
+        product = Product.objects.get(uuid=product_uuid)
+        OrderItem.objects.create_order_product_link(order_item, product, quantity)
+        updated_order = orders.get(uuid=self.request.data['order_uuid'])
+        order = self.serializer_class(updated_order, data=request.data, partial=True)
+        order.is_valid(raise_exception=True)
+        
+        return Response(
+            order.validated_data,
+            status=status.HTTP_200_OK
+        )
+
+
+class UpdateDeliveryStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChangeDeliverySerializer
+    delivery_queryset = Delivery.objects.all()
+
+    def patch(self, request):
+        delivery_object = self.delivery_queryset.get(uuid=request.data['uuid'])
+        serializer = self.serializer_class(delivery_object, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.validated_data,
             status=status.HTTP_200_OK
         )
 

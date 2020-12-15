@@ -67,6 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=255, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    delivery_is_possible = models.BooleanField(default=False)
 
     email = models.EmailField(
         db_index=True,
@@ -172,6 +173,18 @@ class OrderItemManager(models.Manager):
         return order_item
 
 
+class DeliveryManager(models.Manager):
+
+    def create_delivery(self, order, **extra_fields):
+        delivery = self.model(
+            order=order,
+            **extra_fields,
+        )
+        delivery.save(using=self._db)
+
+        return delivery
+
+
 class Chat(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer')
@@ -199,7 +212,7 @@ class Product(models.Model):
     merchant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='merchant')
     price = models.DecimalField(max_digits=9, decimal_places=2)
     description = models.TextField()
-    units = models.CharField(max_length=255, blank=False)  # @TODO: Make as ENUM, not CharField()
+    units = models.CharField(max_length=255, blank=False)  # TODO: Make as ENUM, not CharField()
 
     objects = ProductManager()
 
@@ -216,7 +229,7 @@ class Review(models.Model):
 class Order(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=255, blank=False)  # @TODO: Make as ENUM, not CharField()
+    status = models.CharField(max_length=255, blank=False)  # TODO: Make as ENUM, not CharField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = OrderManager()
@@ -249,3 +262,18 @@ class ProductCategory(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+
+def set_offset():
+    return datetime.now() + timedelta(hours=4)
+
+
+class Delivery(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    time_start = models.DateTimeField(default=datetime.now)
+    time_end = models.DateTimeField(default=set_offset)
+    district = models.CharField(max_length=255, blank=True)
+    delivery_type = models.CharField(max_length=255, blank=False)  # TODO: Make as ENUM, not CharField()
+
+    objects = DeliveryManager()

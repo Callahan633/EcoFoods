@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
-from .models import User, Product, Image, ProductImage, Order, OrderItem
+from .models import User, Product, Image, ProductImage, Order, OrderItem, Delivery
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -42,6 +42,21 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ('quantity', 'product')
 
+
+class UpdateOrderStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ('uuid', 'status')
+
+
+# class AddProductToOrderSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Order
+#         fields = ('uuid', 'created_at')
+#
+#
 
 class OrderSerializer(serializers.ModelSerializer):
 
@@ -114,6 +129,26 @@ class OrderOverallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('uuid', 'status', 'created_at', 'products')
+
+
+class AddDeliverySerializer(serializers.ModelSerializer):
+
+    # order = OrderSerializer()
+
+    class Meta:
+        model = Delivery
+        fields = ('uuid', 'order', 'time_start', 'time_end', 'district', 'delivery_type')
+
+    def create(self, validated_data):
+        delivery = Delivery.objects.create_delivery(**validated_data)
+        return delivery
+
+
+class ChangeDeliverySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Delivery
+        fields = ('uuid', 'time_start', 'time_end', 'delivery_type', 'district')
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

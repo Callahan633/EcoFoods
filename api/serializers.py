@@ -9,7 +9,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('uuid', 'address', 'first_name', 'last_name')
+        fields = ('uuid', 'address', 'first_name', 'last_name', 'phone_number')
 
 
 class SearchProductSerializer(serializers.ModelSerializer):
@@ -114,7 +114,7 @@ class HomeViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant')
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant', 'description')
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):

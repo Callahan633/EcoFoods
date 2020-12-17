@@ -151,7 +151,12 @@ class OrdersListAPIView(ViewSet):
     order_queryset = Order.objects.all()
 
     def retrieve(self, request):
-        user_orders = self.order_queryset.filter(user=self.request.user)
+        if self.request.user.is_merchant:
+            user_orders = self.order_queryset\
+                .select_related('orderitem__product')\
+                .filter(product__merchant=self.request.user).distinct('uuid')
+        else:
+            user_orders = self.order_queryset.filter(user=self.request.user)
         order_serializer = self.serializer_class(user_orders, many=True)
         return Response(
             order_serializer.data,

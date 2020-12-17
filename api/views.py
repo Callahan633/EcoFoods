@@ -156,7 +156,7 @@ class OrdersListAPIView(ViewSet):
                 .filter(uuid__in=OrderItem.objects
                         .select_related('product')
                         .filter(product__merchant=self.request.user)
-                        .values_list('product__merchant', flat=True)
+                        .values_list('order', flat=True)
                         .distinct())
         else:
             user_orders = self.order_queryset.filter(user=self.request.user)

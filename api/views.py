@@ -189,7 +189,7 @@ class MerchantProductsAPIView(ViewSet):
 
     def retrieve(self, request):
         products = Product.objects.all().filter(merchant=self.request.user)
-        product_serializer = self.serializer_class(products, many=True)
+        product_serializer = self.serializer_class(products, context={'request': request}, many=True)
         return Response(
             product_serializer.data,
             status=status.HTTP_200_OK

@@ -166,6 +166,13 @@ class AddDeliverySerializer(serializers.ModelSerializer):
         return delivery
 
 
+class GetDeliverySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Delivery
+        fields = ('uuid',)
+
+
 class ChangeDeliverySerializer(serializers.ModelSerializer):
 
     class Meta:

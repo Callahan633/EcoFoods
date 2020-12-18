@@ -13,9 +13,9 @@ from .utils import UUIDEncoder
 
 class ImageManager(models.Manager):
 
-    def create_image(self, url):
+    def create_image(self, image_base64_string):
         image = self.model(
-            url=url,
+            image=image_base64_string,
         )
         image.save(using=self._db)
 
@@ -24,7 +24,7 @@ class ImageManager(models.Manager):
 
 class Image(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    url = models.URLField()
+    image = models.TextField()
 
     objects = ImageManager()
 

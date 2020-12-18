@@ -56,6 +56,22 @@ class GetUserInfoAPIView(APIView):
         )
 
 
+class GetDeliveryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddDeliverySerializer
+    delivery_queryset = Delivery.objects.all()
+
+    def post(self, request):
+        delivery_object = self.delivery_queryset.get(order=request.data['order_uuid'])
+        delivery_serializer = self.serializer_class(delivery_object, data=request.data)
+        delivery_serializer.is_valid(raise_exception=True)
+
+        return Response(
+            delivery_serializer.validated_data,
+            status=status.HTTP_200_OK
+        )
+
+
 class CreateDeliveryAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AddDeliverySerializer

@@ -42,8 +42,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        image_url = self.context['request'].data['img']
-        image = Image.objects.create_image(image_url)
+        image_string = self.context['request'].data['img']
+        image = Image.objects.create_image(image_string)
         product = Product.objects.create_product_from_merchant(user, **validated_data)
         ProductImage.objects.create_link(image, product)
         return product

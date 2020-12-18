@@ -64,7 +64,7 @@ class GetDeliveryAPIView(APIView):
     def post(self, request):
         delivery_object = self.delivery_queryset.get(order=request.data['order_uuid'])
         delivery_serializer = self.serializer_class(delivery_object, data=request.data)
-        delivery_serializer.is_valid(raise_exception=True)
+        # delivery_serializer.is_valid(raise_exception=True)
 
         return Response(
             delivery_serializer.data,

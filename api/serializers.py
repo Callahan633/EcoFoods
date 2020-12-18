@@ -114,6 +114,13 @@ class ProductSerializerForMerchant(serializers.ModelSerializer):
 class HomeViewSerializer(serializers.ModelSerializer):
     merchant = AddressSerializer()
 
+    @staticmethod
+    def get_images(obj):
+        # serializer_context = {'request': self.context.get('request')}
+        image = ProductImage.objects.filter(product=obj)
+        # return ProductImageSerializer(image, many=True, context=serializer_context).data
+        return ProductImageSerializer(image, many=True).data
+
     class Meta:
         model = Product
         fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant', 'description', 'images')

@@ -113,6 +113,7 @@ class ProductSerializerForMerchant(serializers.ModelSerializer):
 
 class HomeViewSerializer(serializers.ModelSerializer):
     merchant = AddressSerializer()
+    images = serializers.SerializerMethodField()
 
     @staticmethod
     def get_images(obj):

@@ -99,10 +99,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductSerializerForMerchant(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
 
-    def get_images(self, obj):
-        serializer_context = {'request': self.context.get('request')}
+    @staticmethod
+    def get_images(obj):
+        # serializer_context = {'request': self.context.get('request')}
         image = ProductImage.objects.filter(product=obj)
-        return ProductImageSerializer(image, many=True, context=serializer_context).data
+        # return ProductImageSerializer(image, many=True, context=serializer_context).data
+        return ProductImageSerializer(image, many=True).data
 
     class Meta:
         model = Product

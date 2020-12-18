@@ -85,7 +85,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ('uuid', 'url')
+        fields = ('uuid', 'image')
 
 
 class ProductImageSerializer(serializers.ModelSerializer):

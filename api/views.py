@@ -67,7 +67,7 @@ class GetDeliveryAPIView(APIView):
         delivery_serializer.is_valid(raise_exception=True)
 
         return Response(
-            delivery_serializer.validated_data,
+            delivery_serializer.data,
             status=status.HTTP_200_OK
         )
 

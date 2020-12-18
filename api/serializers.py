@@ -116,7 +116,7 @@ class HomeViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant', 'description')
+        fields = ('uuid', 'name', 'is_featured', 'price', 'units', 'merchant', 'description', 'images')
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):

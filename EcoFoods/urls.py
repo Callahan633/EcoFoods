@@ -23,5 +23,5 @@ urlpatterns = [
     re_path(r'^api/update_order_status/?$', UpdateOrderStatusAPIView.as_view(), name='update_order_status'),
     re_path(r'^api/add_product_to_order/?$', AddProductToOrderAPIView.as_view(), name='update_cart'),
     re_path(r'^api/search_product/?$', SearchProductAPIView.as_view(), name='search_by_product_name'),
-    re_path(r'^api/get_delivery/?$', GetDeliveryAPIView.as_view(), name='get_delivery_by_order_uuid')
+    re_path(r'^api/get_delivery/?$', GetDeliveryAPIView.as_view({'get': 'retrieve'}), name='get_delivery_by_order_uuid'),
 ]
